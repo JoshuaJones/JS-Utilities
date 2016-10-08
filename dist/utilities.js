@@ -17,6 +17,14 @@ function each(nodelist, callback, scope) {
     }
 
     return obj;
+};function getElIndex(el, childSelector) {
+  const children = el.parentNode.querySelectorAll(childSelector);
+  for (let i = 0; i < children.length; i++) {
+    if (children[i] == el) {
+      return i;
+    }
+  }
+  return -1;
 };function getMaxHeight(nodelist) {
   let maxHeight = 0;
 
@@ -31,7 +39,58 @@ function each(nodelist, callback, scope) {
   }
 
   return maxHeight;
-};function synchronousLoop(data, processData, done = () => {}) {
+};function isTouch() {
+  return !!(navigator.userAgent.match(/Android/i) ||
+      navigator.userAgent.match(/webOS/i) ||
+      navigator.userAgent.match(/iPhone/i) ||
+      navigator.userAgent.match(/iPad/i) ||
+      navigator.userAgent.match(/iPod/i) ||
+      navigator.userAgent.match(/BlackBerry/i) ||
+      navigator.userAgent.match(/Windows Phone/i));
+};const loadJSONP = (function(){
+  let timer;
+  let unique = 0;
+
+  return function(url) {
+    let promise = new Promise((resolve, reject) => {
+      timer = setTimeout(function() {
+        if (script && script.parentNode) {
+          script.parentNode.removeChild(script);
+          script = null;
+        }
+        delete window[name];
+        if (timer) {
+          clearTimeout(timer);
+        }
+        reject(new Error('Timeout'));
+      }, 10000);
+
+      // INIT
+      var name = "_jsonp_" + unique++;
+      if (url.match(/\?/)) url += "&callback="+name;
+      else url += "?callback="+name;
+      
+      // Create script
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = url;
+      
+      // Setup handler
+      window[name] = function(data){
+        script.parentNode.removeChild(script);
+        script = null;
+        delete window[name];
+
+        resolve(data);
+      };
+      
+      // Load JSON
+      document.getElementsByTagName('head')[0].appendChild(script);
+    });
+
+    return promise;
+  };
+})();;function synchronousLoop(data, processData, done = () => {}) {
   if (data.length > 0) {
     let loop = function(data, i, processData, done) {
       processData(data[i], i, function() {
