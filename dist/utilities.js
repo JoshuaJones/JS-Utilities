@@ -90,7 +90,8 @@ function each(nodelist, callback, scope) {
 
     return promise;
   };
-})();;function synchronousLoop(data, processData, done = () => {}) {
+})();;// https://remysharp.com/2016/10/10/one-devtools-trick
+let $$ = (expr, ctx = document) => Array.from(ctx.querySelectorAll(expr));;function synchronousLoop(data, processData, done = () => {}) {
   if (data.length > 0) {
     let loop = function(data, i, processData, done) {
       processData(data[i], i, function() {
